@@ -54,6 +54,18 @@ func (r *UserRepository) UpdateSurnameAndStatus(ctx context.Context, userID int6
 	return nil
 }
 
+func (r *UserRepository) UpdateKKAndStatus(ctx context.Context, userID int64, isKK bool, status dto.UserStatus) error {
+	op := "UserRepository.UpdateSurnameAndStatus"
+	query := `UPDATE users SET is_kk = $2, status = $3 WHERE id = $1`
+
+	_, err := r.Conn.Exec(ctx, query, userID, isKK, status)
+	if err != nil {
+		return fmt.Errorf("%s: %w", op, err)
+	}
+
+	return nil
+}
+
 func (r *UserRepository) UpdateSeat(ctx context.Context, userID int64, seat int) error {
 	op := "UserRepository.UpdateSeat"
 	query := `UPDATE users SET seat = $2 WHERE id = $1`
@@ -119,7 +131,7 @@ func (r *UserRepository) GetCurrentMaxSeat(ctx context.Context) (int, error) {
 
 func (r *UserRepository) GetUsers(ctx context.Context) ([]dto.UserDTO, error) {
 	op := "UserRepository.GetUsers"
-	query := "SELECT name, surname, seat FROM users"
+	query := "SELECT name, surname, seat, is_kk FROM users"
 
 	rows, err := r.Conn.Query(ctx, query)
 	if err != nil {
@@ -131,7 +143,7 @@ func (r *UserRepository) GetUsers(ctx context.Context) ([]dto.UserDTO, error) {
 
 	for rows.Next() {
 		var userDTO dto.UserDTO
-		if err := rows.Scan(&userDTO.Name, &userDTO.Surname, &userDTO.Seat); err != nil {
+		if err := rows.Scan(&userDTO.Name, &userDTO.Surname, &userDTO.Seat, &userDTO.IsKK); err != nil {
 			return nil, fmt.Errorf("%s: %w", op, err)
 		}
 		usersDTOs = append(usersDTOs, userDTO)

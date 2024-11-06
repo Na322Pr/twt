@@ -48,7 +48,7 @@ func (c *Controller) HandleUpdates(ctx context.Context) {
 		}
 
 		switch status {
-		case dto.UserStatusName, dto.UserStatusSurname:
+		case dto.UserStatusName, dto.UserStatusSurname, dto.UserStatusKK:
 			c.userHandler.Handle(ctx, update)
 		}
 	}

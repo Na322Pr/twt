@@ -35,6 +35,8 @@ func (h *UserHandler) Handle(ctx context.Context, update tgbotapi.Update) {
 		h.Name(ctx, update)
 	case dto.UserStatusSurname:
 		h.Surname(ctx, update)
+	case dto.UserStatusKK:
+		h.KK(ctx, update)
 	}
 }
 
@@ -54,6 +56,16 @@ func (h *UserHandler) Surname(ctx context.Context, update tgbotapi.Update) {
 	updateText := update.Message.Text
 
 	if err := h.uc.UpdateSurname(ctx, userID, updateText); err != nil {
+		fmt.Printf("%s: %v", op, err)
+	}
+}
+
+func (h *UserHandler) KK(ctx context.Context, update tgbotapi.Update) {
+	op := "UserHandler.KK"
+	userID := update.Message.From.ID
+	updateText := update.Message.Text
+
+	if err := h.uc.UpdateKK(ctx, userID, updateText); err != nil {
 		fmt.Printf("%s: %v", op, err)
 	}
 }

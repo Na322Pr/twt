@@ -3,6 +3,7 @@ package usecase
 import (
 	"context"
 	"fmt"
+	"log"
 	"os"
 	"twt/internal/dto"
 	"twt/internal/repository"
@@ -70,7 +71,33 @@ func (uc *UserUsecase) UpdateName(ctx context.Context, userID int64, name string
 
 func (uc *UserUsecase) UpdateSurname(ctx context.Context, userID int64, surname string) error {
 	op := "UserUsecase.UpdateSurname"
-	if err := uc.repo.UpdateSurnameAndStatus(ctx, userID, surname, dto.UserStatusDone); err != nil {
+	if err := uc.repo.UpdateSurnameAndStatus(ctx, userID, surname, dto.UserStatusKK); err != nil {
+		return fmt.Errorf("%s: %w", op, err)
+	}
+
+	msgText := "Вы из киноколледжа? (да/нет)"
+	msg := tgbotapi.NewMessage(userID, msgText)
+
+	if _, err := uc.bot.Send(msg); err != nil {
+		fmt.Printf("%s: %v", op, err)
+	}
+
+	return nil
+}
+
+func (uc *UserUsecase) UpdateKK(ctx context.Context, userID int64, kk string) error {
+	op := "UserUsecase.UpdateKK"
+
+	isKK := false
+	switch kk {
+	case "Да", "да":
+		log.Printf("Check")
+		isKK = true
+	}
+
+	log.Print(isKK)
+
+	if err := uc.repo.UpdateKKAndStatus(ctx, userID, isKK, dto.UserStatusDone); err != nil {
 		return fmt.Errorf("%s: %w", op, err)
 	}
 
@@ -168,17 +195,27 @@ func (uc *UserUsecase) writeToFile(ctx context.Context, usersDTOs []dto.UserDTO)
 	}
 	defer f.Close()
 
-	_, err = f.WriteString("Имя                  Фамилия              Место\n")
+	_, err = f.WriteString("Имя                  Фамилия              Место     КК\n")
 	if err != nil {
 		return "", fmt.Errorf("%s: %v", op, err)
 	}
 
 	for _, userDTO := range usersDTOs {
+		kk := "Нет"
+
+		log.Print(userDTO.IsKK)
+
+		if userDTO.IsKK {
+			kk = "Да"
+		}
+
 		_, err := f.WriteString(
-			fmt.Sprintf("%-20s %-20s %-5d\n",
+			fmt.Sprintf("%-20s %-20s %-9d %-5s\n",
 				userDTO.Name,
 				userDTO.Surname,
-				userDTO.Seat),
+				userDTO.Seat,
+				kk,
+			),
 		)
 		if err != nil {
 			return "", fmt.Errorf("%s: %v", op, err)
