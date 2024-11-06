@@ -24,6 +24,8 @@ func (h *CommandHandler) Handle(ctx context.Context, update tgbotapi.Update) {
 	switch update.Message.Command() {
 	case "start":
 		h.Start(ctx, update)
+	case "load":
+		h.LoadData(ctx, update)
 	}
 }
 
@@ -33,6 +35,17 @@ func (h *CommandHandler) Start(ctx context.Context, update tgbotapi.Update) {
 	userID := update.Message.From.ID
 
 	err := h.uc.CreateUser(ctx, userID)
+	if err != nil {
+		fmt.Printf("%s: %v", op, err)
+	}
+}
+
+func (h *CommandHandler) LoadData(ctx context.Context, update tgbotapi.Update) {
+	op := "CommandHandler.LoadData"
+
+	userID := update.Message.From.ID
+
+	err := h.uc.GetUsersListFile(ctx, userID)
 	if err != nil {
 		fmt.Printf("%s: %v", op, err)
 	}

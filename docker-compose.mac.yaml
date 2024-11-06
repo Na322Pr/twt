@@ -36,6 +36,7 @@ services:
       - .env
     volumes:
       - ./config:/config
+      - .:/static
     ports:
       - "8080:8080"
     command: ["/bin/sh", "-c", "sleep 15 && ./twt --config=/config/config.yaml"]

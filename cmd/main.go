@@ -35,6 +35,7 @@ func main() {
 
 	commands := []tgbotapi.BotCommand{
 		{Command: "start", Description: "Запуск бота"},
+		{Command: "load", Description: "Выгрузить список участников"},
 	}
 
 	cmgCfg := tgbotapi.NewSetMyCommands(commands...)

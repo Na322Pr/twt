@@ -116,3 +116,30 @@ func (r *UserRepository) GetCurrentMaxSeat(ctx context.Context) (int, error) {
 
 	return seat, nil
 }
+
+func (r *UserRepository) GetUsers(ctx context.Context) ([]dto.UserDTO, error) {
+	op := "UserRepository.GetUsers"
+	query := "SELECT name, surname, seat FROM users"
+
+	rows, err := r.Conn.Query(ctx, query)
+	if err != nil {
+		return nil, fmt.Errorf("%s: %w", op, err)
+	}
+	defer rows.Close()
+
+	usersDTOs := make([]dto.UserDTO, 0, 50)
+
+	for rows.Next() {
+		var userDTO dto.UserDTO
+		if err := rows.Scan(&userDTO.Name, &userDTO.Surname, &userDTO.Seat); err != nil {
+			return nil, fmt.Errorf("%s: %w", op, err)
+		}
+		usersDTOs = append(usersDTOs, userDTO)
+	}
+
+	if err := rows.Err(); err != nil {
+		return nil, fmt.Errorf("%s: %w", op, err)
+	}
+
+	return usersDTOs, nil
+}
