@@ -11,23 +11,27 @@ import (
 )
 
 type UserUsecase struct {
-	bot     *tgbotapi.BotAPI
-	repo    *repository.UserRepository
-	curSeat int
-	maxSeat int
+	bot         *tgbotapi.BotAPI
+	repo        *repository.UserRepository
+	subAdminIDs []int64
+	curSeat     int
+	maxSeat     int
 }
 
-func NewUserUsecase(bot *tgbotapi.BotAPI, repo *repository.UserRepository) *UserUsecase {
+func NewUserUsecase(bot *tgbotapi.BotAPI, repo *repository.UserRepository, subAdminIDs []int64) *UserUsecase {
 	curSeat, err := repo.GetCurrentMaxSeat(context.Background())
 	if err != nil {
-		curSeat = 1
+		curSeat = 0
 	}
 
+	curSeat += 1
+
 	return &UserUsecase{
-		bot:     bot,
-		repo:    repo,
-		curSeat: curSeat,
-		maxSeat: 70,
+		bot:         bot,
+		repo:        repo,
+		subAdminIDs: subAdminIDs,
+		curSeat:     curSeat,
+		maxSeat:     70,
 	}
 }
 
@@ -38,7 +42,7 @@ func (uc *UserUsecase) CreateUser(ctx context.Context, userID int64) error {
 		return fmt.Errorf("%s: %w", op, err)
 	}
 
-	msgText := "Ваше имя?"
+	msgText := "Ваше имя? (Только имя)"
 	msg := tgbotapi.NewMessage(userID, msgText)
 
 	if _, err := uc.bot.Send(msg); err != nil {
@@ -108,6 +112,24 @@ func (uc *UserUsecase) GetUserStatus(ctx context.Context, userID int64) (dto.Use
 func (uc *UserUsecase) GetUsersListFile(ctx context.Context, userID int64) error {
 	op := "UserUsecase.GetUsersListFile"
 
+	flag := false
+	for _, subAmdinID := range uc.subAdminIDs {
+		if subAmdinID == userID {
+			flag = true
+			continue
+		}
+	}
+
+	if !flag {
+		msgText := "У вас недостаточно прав"
+		msg := tgbotapi.NewMessage(userID, msgText)
+		if _, err := uc.bot.Send(msg); err != nil {
+			return fmt.Errorf("%s: %w", op, err)
+		}
+
+		return nil
+	}
+
 	usersDTOs, err := uc.repo.GetUsers(ctx)
 	if err != nil {
 		return fmt.Errorf("%s: %w", op, err)
@@ -146,14 +168,14 @@ func (uc *UserUsecase) writeToFile(ctx context.Context, usersDTOs []dto.UserDTO)
 	}
 	defer f.Close()
 
-	_, err = f.WriteString("Имя\t\tФамилия\t\tМесто\n")
+	_, err = f.WriteString("Имя                  Фамилия              Место\n")
 	if err != nil {
 		return "", fmt.Errorf("%s: %v", op, err)
 	}
 
 	for _, userDTO := range usersDTOs {
 		_, err := f.WriteString(
-			fmt.Sprintf("%s\t%s\t%d\n",
+			fmt.Sprintf("%-20s %-20s %-5d\n",
 				userDTO.Name,
 				userDTO.Surname,
 				userDTO.Seat),

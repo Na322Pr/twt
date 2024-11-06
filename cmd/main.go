@@ -51,7 +51,7 @@ func main() {
 	defer pg.Close()
 
 	repository := repository.NewUserRepository(pg)
-	usecase := usecase.NewUserUsecase(bot, repository)
+	usecase := usecase.NewUserUsecase(bot, repository, cfg.SubAdminIDs)
 	controller := controller.NewController(bot, usecase)
 
 	go func() {
