@@ -36,6 +36,11 @@ func (c *Controller) HandleUpdates(ctx context.Context) {
 
 	updates := c.bot.GetUpdatesChan(u)
 	for update := range updates {
+		if update.Message != nil {
+			fmt.Printf("%s: received non-message update: %+v\n", op, update)
+			continue
+		}
+
 		if update.Message.IsCommand() {
 			c.commandHandler.Handle(ctx, update)
 			continue
