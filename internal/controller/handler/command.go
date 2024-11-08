@@ -2,7 +2,7 @@ package handler
 
 import (
 	"context"
-	"fmt"
+	"log"
 	"twt/internal/usecase"
 
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
@@ -21,6 +21,8 @@ func NewCommandHandler(bot *tgbotapi.BotAPI, uc *usecase.UserUsecase) *CommandHa
 }
 
 func (h *CommandHandler) Handle(ctx context.Context, update tgbotapi.Update) {
+	log.Print(update.Message.Command())
+
 	switch update.Message.Command() {
 	case "start":
 		h.Start(ctx, update)
@@ -36,7 +38,7 @@ func (h *CommandHandler) Start(ctx context.Context, update tgbotapi.Update) {
 
 	err := h.uc.CreateUser(ctx, userID)
 	if err != nil {
-		fmt.Printf("%s: %v", op, err)
+		log.Printf("%s: %v", op, err)
 	}
 }
 
@@ -47,6 +49,6 @@ func (h *CommandHandler) LoadData(ctx context.Context, update tgbotapi.Update) {
 
 	err := h.uc.GetUsersListFile(ctx, userID)
 	if err != nil {
-		fmt.Printf("%s: %v", op, err)
+		log.Printf("%s: %v", op, err)
 	}
 }

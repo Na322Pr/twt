@@ -63,7 +63,7 @@ func main() {
 	}
 
 	<-stop
-	fmt.Println("\nShutting down...")
+	log.Println("\nShutting down...")
 	os.Exit(0)
 }
 

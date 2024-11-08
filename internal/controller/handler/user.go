@@ -2,7 +2,7 @@ package handler
 
 import (
 	"context"
-	"fmt"
+	"log"
 	"twt/internal/dto"
 	"twt/internal/usecase"
 
@@ -27,7 +27,7 @@ func (h *UserHandler) Handle(ctx context.Context, update tgbotapi.Update) {
 
 	status, err := h.uc.GetUserStatus(ctx, userID)
 	if err != nil {
-		fmt.Printf("%s: %v", op, err)
+		log.Printf("%s: %v", op, err)
 	}
 
 	switch status {
@@ -46,7 +46,7 @@ func (h *UserHandler) Name(ctx context.Context, update tgbotapi.Update) {
 	updateText := update.Message.Text
 
 	if err := h.uc.UpdateName(ctx, userID, updateText); err != nil {
-		fmt.Printf("%s: %v", op, err)
+		log.Printf("%s: %v", op, err)
 	}
 }
 
@@ -56,7 +56,7 @@ func (h *UserHandler) Surname(ctx context.Context, update tgbotapi.Update) {
 	updateText := update.Message.Text
 
 	if err := h.uc.UpdateSurname(ctx, userID, updateText); err != nil {
-		fmt.Printf("%s: %v", op, err)
+		log.Printf("%s: %v", op, err)
 	}
 }
 
@@ -66,6 +66,6 @@ func (h *UserHandler) KK(ctx context.Context, update tgbotapi.Update) {
 	updateText := update.Message.Text
 
 	if err := h.uc.UpdateKK(ctx, userID, updateText); err != nil {
-		fmt.Printf("%s: %v", op, err)
+		log.Printf("%s: %v", op, err)
 	}
 }

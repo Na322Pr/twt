@@ -3,7 +3,6 @@ package usecase
 import (
 	"context"
 	"fmt"
-	"log"
 	"os"
 	"twt/internal/dto"
 	"twt/internal/repository"
@@ -47,7 +46,7 @@ func (uc *UserUsecase) CreateUser(ctx context.Context, userID int64) error {
 	msg := tgbotapi.NewMessage(userID, msgText)
 
 	if _, err := uc.bot.Send(msg); err != nil {
-		fmt.Printf("%s: %v", op, err)
+		return fmt.Errorf("%s: %w", op, err)
 	}
 
 	return nil
@@ -63,7 +62,7 @@ func (uc *UserUsecase) UpdateName(ctx context.Context, userID int64, name string
 	msg := tgbotapi.NewMessage(userID, msgText)
 
 	if _, err := uc.bot.Send(msg); err != nil {
-		fmt.Printf("%s: %v", op, err)
+		return fmt.Errorf("%s: %w", op, err)
 	}
 
 	return nil
@@ -79,7 +78,7 @@ func (uc *UserUsecase) UpdateSurname(ctx context.Context, userID int64, surname 
 	msg := tgbotapi.NewMessage(userID, msgText)
 
 	if _, err := uc.bot.Send(msg); err != nil {
-		fmt.Printf("%s: %v", op, err)
+		return fmt.Errorf("%s: %w", op, err)
 	}
 
 	return nil
@@ -91,11 +90,8 @@ func (uc *UserUsecase) UpdateKK(ctx context.Context, userID int64, kk string) er
 	isKK := false
 	switch kk {
 	case "Да", "да":
-		log.Printf("Check")
 		isKK = true
 	}
-
-	log.Print(isKK)
 
 	if err := uc.repo.UpdateKKAndStatus(ctx, userID, isKK, dto.UserStatusDone); err != nil {
 		return fmt.Errorf("%s: %w", op, err)
@@ -157,7 +153,7 @@ func (uc *UserUsecase) GetUsersListFile(ctx context.Context, userID int64) error
 		return nil
 	}
 
-	usersDTOs, err := uc.repo.GetUsers(ctx)
+	usersDTOs, err := uc.repo.GetUsersWithSeats(ctx)
 	if err != nil {
 		return fmt.Errorf("%s: %w", op, err)
 	}
@@ -202,8 +198,6 @@ func (uc *UserUsecase) writeToFile(ctx context.Context, usersDTOs []dto.UserDTO)
 
 	for _, userDTO := range usersDTOs {
 		kk := "Нет"
-
-		log.Print(userDTO.IsKK)
 
 		if userDTO.IsKK {
 			kk = "Да"

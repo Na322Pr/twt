@@ -129,9 +129,9 @@ func (r *UserRepository) GetCurrentMaxSeat(ctx context.Context) (int, error) {
 	return seat, nil
 }
 
-func (r *UserRepository) GetUsers(ctx context.Context) ([]dto.UserDTO, error) {
-	op := "UserRepository.GetUsers"
-	query := "SELECT name, surname, seat, is_kk FROM users"
+func (r *UserRepository) GetUsersWithSeats(ctx context.Context) ([]dto.UserDTO, error) {
+	op := "UserRepository.GetUsersWithSeats"
+	query := "SELECT name, surname, seat, is_kk FROM users WHERE is_kk IS NOT NULL"
 
 	rows, err := r.Conn.Query(ctx, query)
 	if err != nil {
